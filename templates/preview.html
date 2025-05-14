@@ -1,0 +1,26 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Preview Your Meal Plan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+</head>
+<body class="p-4">
+  <h2>Preview Your Meal Plan Info</h2>
+  <div class="card p-3 mb-4">
+    <ul class="list-group list-group-flush">
+      {% for key, value in data.items() %}
+        <li class="list-group-item"><strong>{{ key.replace('_', ' ').capitalize() }}:</strong> {{ value }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <form action="/download" method="post">
+    {% for key, value in data.items() %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Download PDF Meal Plan</button>
+  </form>
+</body>
+</html>
