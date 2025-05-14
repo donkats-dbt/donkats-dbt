@@ -16,31 +16,88 @@ def generate_pdf(data):
 
     pdf.ln(5)
 
+    # Determine household size
+    household_size = 0
+    if data.get('adult1_name') or data.get('adult1_age'):
+        household_size += 1
+    if data.get('adult2_name') or data.get('adult2_age'):
+        household_size += 1
+    for i in range(1, 5):
+        if data.get(f'child{i}_name') or data.get(f'child{i}_age'):
+            household_size += 1
+    if household_size == 0:
+            household_size = 1
+
     # Weekly meal data
     meal_data = {
-        "Sunday": [("Breakfast", "Oatmeal w/ fruit", 1.20), ("Lunch", "Grilled Cheese", 2.30), ("Dinner", "Chicken Pasta", 4.80)],
-        "Monday": [("Breakfast", "Pancakes", 1.50), ("Lunch", "Turkey Wrap", 2.70), ("Dinner", "Beef Stir Fry", 5.00)],
-        "Tuesday": [("Breakfast", "Scrambled Eggs", 1.40), ("Lunch", "Chicken Salad", 2.90), ("Dinner", "Spaghetti", 4.50)],
-        "Wednesday": [("Breakfast", "Bagel & Cream Cheese", 1.30), ("Lunch", "Veggie Wrap", 2.20), ("Dinner", "Baked Chicken", 5.20)],
-        "Thursday": [("Breakfast", "Cereal & Milk", 1.00), ("Lunch", "Ham Sandwich", 2.40), ("Dinner", "Taco Night", 4.80)],
-        "Friday": [("Breakfast", "Waffles", 1.50), ("Lunch", "Quesadilla", 2.60), ("Dinner", "Fish & Rice", 5.10)],
-        "Saturday": [("Breakfast", "French Toast", 1.60), ("Lunch", "PB&J Sandwich", 1.80), ("Dinner", "Homemade Pizza", 5.50)]
-    }
+    "Sunday": [
+        ("Breakfast", "Oatmeal w/ fruit", "Quaker", 1.20),
+        ("Lunch", "Grilled Cheese", "Kraft", 2.30),
+        ("Dinner", "Chicken Pasta", "Tyson", 4.80)
+    ],
+    "Monday": [
+        ("Breakfast", "Pancakes", "Aunt Jemima", 1.50),
+        ("Lunch", "Turkey Wrap", "Hillshire Farm", 2.70),
+        ("Dinner", "Beef Stir Fry", "Smithfield", 5.00)
+    ],
+    "Tuesday": [
+        ("Breakfast", "Scrambled Eggs", "Eggland's Best", 1.40),
+        ("Lunch", "Chicken Salad", "Perdue", 2.90),
+        ("Dinner", "Spaghetti", "Barilla", 4.50)
+    ],
+    "Wednesday": [
+        ("Breakfast", "Bagel & Cream Cheese", "Philadelphia", 1.30),
+        ("Lunch", "Veggie Wrap", "Fresh Express", 2.20),
+        ("Dinner", "Baked Chicken", "Tyson", 5.20)
+    ],
+    "Thursday": [
+        ("Breakfast", "Cereal & Milk", "Kellogg's", 1.00),
+        ("Lunch", "Ham Sandwich", "Oscar Mayer", 2.40),
+        ("Dinner", "Taco Night", "Old El Paso", 4.80)
+    ],
+    "Friday": [
+        ("Breakfast", "Waffles", "Eggo", 1.50),
+        ("Lunch", "Quesadilla", "Sargento", 2.60),
+        ("Dinner", "Fish & Rice", "Gorton's", 5.10)
+    ],
+    "Saturday": [
+        ("Breakfast", "French Toast", "Pepperidge Farm", 1.60),
+        ("Lunch", "PB&J Sandwich", "Jif & Smucker's", 1.80),
+        ("Dinner", "Homemade Pizza", "Pillsbury", 5.50)
+    ]
+}
 
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "7-Day Meal Plan", ln=True)
+#    pdf.set_font("Arial", "B", 12)
+#    pdf.cell(35, 8, "Meal", 1)
+#    pdf.cell(75, 8, "Item", 1)
+#    pdf.cell(50, 8, "Brand", 1)
+#    pdf.cell(30, 8, "Cost", 1)
+#   pdf.ln()
 
     weekly_total = 0
     for day, meals in meal_data.items():
         pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 8, f"{day}", ln=True)
+
+        # Add column headers for each day
+        pdf.set_font("Arial", "B", 10)
+        pdf.cell(35, 8, "Meal", 1)
+        pdf.cell(75, 8, "Item", 1)
+        pdf.cell(50, 8, "Brand", 1)
+        pdf.cell(30, 8, "Cost", 1)
+        pdf.ln()
+
+        # Meal rows
         pdf.set_font("Arial", "", 10)
-        for meal, item, price in meals:
-            pdf.cell(40, 8, meal, 1)
-            pdf.cell(100, 8, item, 1)
-            pdf.cell(40, 8, f"${price:.2f}", 1)
+        for meal, item, brand, price in meals:
+            total_price = price * household_size
+            pdf.cell(35, 8, meal, 1)
+            pdf.cell(75, 8, item, 1)
+            pdf.cell(50, 8, brand, 1)
+            pdf.cell(30, 8, f"${total_price:.2f}", 1)
             pdf.ln()
-            weekly_total += price
+            weekly_total += total_price
+
         pdf.ln(3)
 
     pdf.set_font("Arial", "B", 12)
@@ -63,23 +120,25 @@ def generate_pdf(data):
 
     pdf.set_font("Arial", "", 10)
     shopping = [
-        ("Oatmeal", "1 box", "Quaker", 1.20),
-        ("Bread", "2 loaves", "Store Brand", 4.00),
-        ("Chicken Breast", "3 lb", "Tyson", 8.97),
-        ("Milk", "1 gal", "Great Value", 3.50),
-        ("Pasta", "1 box", "Barilla", 1.00),
-        ("Cheese", "1 block", "Kraft", 2.50),
-        ("Eggs", "1 dozen", "Eggland's Best", 2.20),
-        ("Wraps", "6 pack", "Mission", 2.00),
-        ("Cereal", "1 box", "Kellogg's", 1.00),
-        ("Pizza Dough", "1 pack", "Pillsbury", 2.50)
+        ("Oatmeal", 1, "box", "Quaker", 1.20),
+        ("Bread", 2, "loaves", "Store Brand", 4.00),
+        ("Chicken Breast", 3, "lb", "Tyson", 8.97),
+        ("Milk", 1, "gal", "Great Value", 3.50),
+        ("Pasta", 1, "box", "Barilla", 1.00),
+        ("Cheese", 1, "block", "Kraft", 2.50),
+        ("Eggs", 1, "dozen", "Eggland's Best", 2.20),
+        ("Wraps", 1, "pack", "Mission", 2.00),
+        ("Cereal", 1, "box", "Kellogg's", 1.00),
+        ("Pizza Dough", 1, "pack", "Pillsbury", 2.50)
     ]
 
-    for item, qty, brand, total in shopping:
+    for item, qty, unit, brand, price in shopping:
+        total_qty = qty * household_size
+        total_price = price * household_size
         pdf.cell(70, 8, item, 1)
-        pdf.cell(30, 8, qty, 1)
+        pdf.cell(30, 8, f"{total_qty} {unit}", 1)
         pdf.cell(60, 8, brand, 1)
-        pdf.cell(30, 8, f"${total:.2f}", 1)
+        pdf.cell(30, 8, f"${total_price:.2f}", 1)
         pdf.ln()
 
     # Page break for calorie summary
