@@ -1,58 +1,26 @@
 
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>DonKats Meal Planner</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>DonKats Meal Plan Input</title>
 </head>
-<body class="p-4">
-  <h2>DonKats Meal Planner</h2>
+<body>
+  <h2>Enter Your Family Meal Plan Info</h2>
   <form action="/preview" method="post">
-    <div class="form-row">
-      <div class="col">
-        <label>Weekly Budget ($)</label>
-        <input type="number" class="form-control" name="budget" required>
-      </div>
-      <div class="col">
-        <label>ZIP Code</label>
-        <input type="text" class="form-control" name="zip" required>
-      </div>
-      <div class="col">
-        <label>Food Restrictions</label>
-        <input type="text" class="form-control" name="restriction" placeholder="e.g., peanuts, mushrooms">
-      </div>
-    </div>
+    <label>Budget: $<input type="number" name="budget" step="0.01" required></label><br><br>
+    <label>ZIP Code: <input type="text" name="zip" required></label><br><br>
+    <label>Food Restrictions: <input type="text" name="restriction"></label><br><br>
+    <label><input type="checkbox" name="include_fish_friday" checked> Include fish as a random dinner on Friday?</label><br><br>
+    <h3>Adults</h3>
+    <label>Adult 1 Name: <input type="text" name="adult1_name"> Age: <input type="number" name="adult1_age"></label><br>
+    <label>Adult 2 Name: <input type="text" name="adult2_name"> Age: <input type="number" name="adult2_age"></label><br>
+    <h3>Children</h3>
+    {% for i in range(1, 7) %}
+      <label>Child {{i}} Name: <input type="text" name="child{{i}}_name"> Age: <input type="number" name="child{{i}}_age"></label><br>
+    {% endfor %}
     <br>
-    <h5>Adults</h5>
-    <div class="form-row">
-      <div class="col"><input type="text" class="form-control" name="adult1_name" placeholder="Adult 1 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="adult1_age" placeholder="Age"></div>
-    </div>
-    <div class="form-row mt-2">
-      <div class="col"><input type="text" class="form-control" name="adult2_name" placeholder="Adult 2 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="adult2_age" placeholder="Age"></div>
-    </div>
-    <br>
-    <h5>Children (0 to 4)</h5>
-    <div class="form-row">
-      <div class="col"><input type="text" class="form-control" name="child1_name" placeholder="Child 1 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="child1_age" placeholder="Age"></div>
-    </div>
-    <div class="form-row mt-2">
-      <div class="col"><input type="text" class="form-control" name="child2_name" placeholder="Child 2 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="child2_age" placeholder="Age"></div>
-    </div>
-    <div class="form-row mt-2">
-      <div class="col"><input type="text" class="form-control" name="child3_name" placeholder="Child 3 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="child3_age" placeholder="Age"></div>
-    </div>
-    <div class="form-row mt-2">
-      <div class="col"><input type="text" class="form-control" name="child4_name" placeholder="Child 4 Name"></div>
-      <div class="col"><input type="number" class="form-control" name="child4_age" placeholder="Age"></div>
-    </div>
-    <br>
-    <button type="submit" class="btn btn-success">Preview Plan</button>
+    <input type="submit" value="Preview Meal Plan">
   </form>
 </body>
 </html>
