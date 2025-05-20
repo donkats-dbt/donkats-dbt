@@ -1,48 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonKats Family Meal Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5fff5;
+            color: #333;
+        }
+        header {
+            background-color: #8fcf87;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .container {
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .feature {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .feature h3 {
+            margin-top: 0;
+        }
+        .cta {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        .cta a {
+            background-color: #4caf50;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-size: 1.2rem;
+            border-radius: 8px;
+        }
+        .price {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>DonKats Family Meal Planner</h1>
+        <p>Smart, Budget-Friendly Meal Plans for Your Family</p>
+    </header>
 
-from flask import Flask, render_template, request, send_file, session, redirect
-from meal_logic import generate_pdf
-import os
+    <div class="container">
+        <section class="features">
+            <div class="feature">
+                <h3>💡 Custom Weekly Meal Plans</h3>
+                <p>Personalized for family size, budget, and food restrictions</p>
+            </div>
+            <div class="feature">
+                <h3>🛒 Smart Shopping List</h3>
+                <p>Auto-generated with prices and brands</p>
+            </div>
+            <div class="feature">
+                <h3>📅 7-Day Meal Calendar</h3>
+                <p>Breakfast, lunch, and dinner for the week</p>
+            </div>
+            <div class="feature">
+                <h3>🐟 Optional Fish on Friday</h3>
+                <p>Let the planner add a surprise seafood dinner</p>
+            </div>
+        </section>
 
-app = Flask(__name__)
-app.secret_key = 'your-secret-key'
-
-@app.route('/')
-def home():
-    return render_template("landing.html")
-
-@app.route('/form')
-def form():
-    return render_template("form.html")
-
-@app.route('/preview', methods=['POST'])
-def preview():
-    data = request.form.to_dict()
-    data['include_fish_friday'] = request.form.get('include_fish_friday') in ['on', 'true', '1']
-    return render_template('preview.html', data=data)
-
-@app.route('/download', methods=['GET', 'POST'])
-def download():
-    if not session.get('paid'):
-        return redirect("/pay")
-    if request.method == 'POST':
-        data = request.form.to_dict()
-        pdf_path = generate_pdf(data)
-        return send_file(pdf_path, as_attachment=True)
-    return send_file("meal_plan_output.pdf", as_attachment=True)
-
-@app.route('/confirm', methods=['POST'])
-def confirm():
-    session['paid'] = True
-    return '', 204
-
-@app.route("/pay")
-def pay():
-    return render_template("pay.html")
-
-@app.route("/landing")
-def landing():
-    return render_template("landing.html")
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+	<div class="price">
+		Basic Plan: $6.95 one-time<br>
+		<em>Mix & Match meals included</em>
+		<p style="text-align:center; font-size:1rem; margin-top:1rem;">
+			Use <strong>Pay Now</strong> to generate your DonKats Weekly Meal Plan.<br>
+			<em>Our next release will include discounted monthly and yearly subscription plans.</em>
+		</p>
+	</div>
+		
+        <div class="cta">
+            <a href="/pay">Pay Now</a>
+        </div>
+    </div>
+</body>
+</html>
