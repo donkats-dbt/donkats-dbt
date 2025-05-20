@@ -1,3 +1,268 @@
+# Updated 5/18/2025 5:54 AM
+
+# --- USDA Tier Budget Mapping ---
+
+TIER_WEEKLY_BUDGET = {
+    "Thrifty": 180,
+    "Moderate": 250,
+    "Liberal": 320
+}
+
+def calculate_budget_for_family(tier=None, family_size=4):
+    tier = tier or "Liberal"
+    base_budget = TIER_WEEKLY_BUDGET.get(tier, 320)
+    # Baseline family of 4; add 25% per additional child
+    extra_members = max(family_size - 4, 0)
+    return base_budget + (extra_members * 0.25 * base_budget)
+
+
+def infer_tier_from_budget(budget):
+    if budget <= 180:
+        return "Thrifty"
+    elif 180 < budget <= 250:
+        return "Moderate"
+    else:
+        return "Liberal"
+
+
+# --- Thrifty Substitution Logic ---
+thrifty_substitutions = {
+    "Salmon fillet": "Canned tuna",
+    "Beef strips": "Chicken thighs",
+    "Mozzarella cheese": "Blended shredded cheese",
+    "Marinara sauce": "Store-brand marinara",
+    "Pizza dough": "Homemade dough",
+    "Olive oil": "Vegetable oil",
+    "Cheddar cheese": "Cheddar blend",
+    "Pasta": "Generic pasta",
+    "Ground beef": "Ground chicken",
+    "Strawberries": "Canned fruit",
+    "Eggs": "Store-brand eggs"
+}
+
+#def apply_tier_pricing(meal_plan, selected_tier):
+#    if selected_tier == "Liberal":
+#       new_price = max(price * 1.2, 0.5)
+#       return meal_plan
+#    if selected_tier != "Thrifty":
+#      return meal_plan        
+#    substituted_plan = {}
+#   for day, meals in meal_plan.items():
+#        new_meals = []
+#        for meal_type, item, brand, price in meals:
+#           if item in thrifty_substitutions:
+#                new_item = thrifty_substitutions[item]
+#                new_brand = "Generic"
+#                new_price = max(price * 0.8, 0.5)  # Estimate 20% savings
+#                new_meals.append((meal_type, new_item, new_brand, new_price))
+#            else:
+#                new_meals.append((meal_type, item, brand, price))
+#        substituted_plan[day] = new_meals
+#    return substituted_plan
+
+def apply_tier_pricing(meal_plan, selected_tier):
+    updated_plan = {}
+    substitutions_made = []
+    price_adjustments = []
+
+    for day, meals in meal_plan.items():
+        new_meals = []
+
+        for meal_type, item, brand, price in meals:
+            if selected_tier == "Thrifty":
+                if item in thrifty_substitutions:
+                    new_item = thrifty_substitutions[item]
+                    new_brand = "Generic"
+                    new_price = max(price * 0.8, 0.5)
+                    new_meals.append((meal_type, new_item, new_brand, new_price))
+                    substitutions_made.append(f"{item} ➜ {new_item} at ${new_price:.2f}")
+                else:
+                    new_price = max(price * 0.8, 0.5)
+                    new_meals.append((meal_type, item, brand, new_price))
+                    price_adjustments.append(f"{item} price reduced to ${new_price:.2f}")
+
+            elif selected_tier == "Liberal":
+                new_price = max(price * 1.2, 0.5)
+                new_meals.append((meal_type, item, brand, new_price))
+                price_adjustments.append(f"{item} price increased to ${new_price:.2f}")
+
+            else:  # Moderate or default
+                new_meals.append((meal_type, item, brand, price))
+
+        updated_plan[day] = new_meals
+
+    return updated_plan
+
+# --- Base Ingredient Prices (USDA Estimate) ---
+ingredient_base_prices = {
+    "Milk": 3.50,
+    "Eggs": 2.80,
+    "Bread": 2.00,
+    "Cheddar cheese": 4.00,
+    "Mozzarella cheese": 4.50,
+    "Spaghetti noodles": 1.20,
+    "Pasta": 1.10,
+    "Tortillas": 2.50,
+    "Ground beef": 4.80,
+    "Ground beef": 3.50,
+    "Chicken breast": 3.50,
+    "Beef strips": 5.00,
+    "Salmon fillet": 7.00,
+    "Canned tuna": 1.30,
+    "Pizza dough": 2.50,
+    "Tomato sauce": 1.70,
+    "Marinara sauce": 2.00,
+    "Rice": 1.00,
+    "White rice": 1.10,
+    "Oatmeal": 2.40,
+    "Pancake mix": 2.20,
+    "Maple syrup": 3.60,
+    "Bananas": 0.25,
+    "Strawberries": 2.50,
+    "Lettuce": 1.80,
+    "Shredded lettuce": 1.90,
+    "Mixed vegetables": 2.20,
+    "Hummus": 3.00,
+    "Sliced turkey": 4.20,
+    "Taco shells": 2.30,
+    "Salsa": 2.00,
+    "Olive oil": 4.50,
+    "Butter": 3.20,
+    "Garlic powder": 1.50,
+    "Paprika": 1.50,
+    "Peas": 1.00,
+    "Egg noodles": 1.50,
+    "Cream of mushroom soup": 1.40,
+    "Mayonnaise": 3.00,
+    "Pepperoni": 3.00,
+    "Cream sauce": 2.00,
+    "Lemon": 0.60,
+    "Garlic": 0.50
+}
+
+
+# --- Ingredient Mapping for Shopping List ---
+meal_ingredients = {
+    "Baked Chicken": [
+        {"item": "Chicken thighs", "qty": 2, "unit": "lb", "brand": "Tyson"},
+        {"item": "Olive oil", "qty": 1, "unit": "bottle"},
+        {"item": "Garlic powder", "qty": 1, "unit": "jar"},
+        {"item": "Paprika", "qty": 1, "unit": "jar"}
+    ],
+    "Beef Stir Fry": [
+        {"item": "Beef strips", "qty": 1, "unit": "lb"},
+        {"item": "Mixed stir fry vegetables", "qty": 1, "unit": "bag"},
+        {"item": "Soy sauce", "qty": 1, "unit": "bottle"},
+        {"item": "Rice", "qty": 1, "unit": "lb"}
+    ],
+        "Turkey Stir Fry": [
+        {"item": "Diced turkey", "qty": 1, "unit": "lb"},
+        {"item": "Mixed stir fry vegetables", "qty": 1, "unit": "bag"},
+        {"item": "Soy sauce", "qty": 1, "unit": "bottle"},
+        {"item": "Rice", "qty": 1, "unit": "lb"}
+    ],
+    "Cereal & Milk": [
+        {"item": "Cereal", "qty": 1, "unit": "box", "brand": "Kellogg's"},
+        {"item": "Milk", "qty": 1, "unit": "gal", "brand": "Great Value"}
+    ],
+    "Chicken Salad": [
+        {"item": "Chicken breast", "qty": 1, "unit": "lb", "brand": "Perdue"},
+        {"item": "Mayonnaise", "qty": 1, "unit": "jar"},
+        {"item": "Lettuce", "qty": 1, "unit": "head"}
+    ],
+    "Fish & Rice": [
+        {"item": "Frozen fish fillets", "qty": 1, "unit": "pack", "brand": "Gorton's"},
+        {"item": "White rice", "qty": 1, "unit": "lb"}
+    ],
+    "Grilled Cheese": [
+        {"item": "Bread", "qty": 1, "unit": "loaf"},
+        {"item": "Cheddar cheese", "qty": 1, "unit": "lb", "brand": "Kraft"},
+        {"item": "Butter", "qty": 1, "unit": "stick"}
+    ],
+    "Grilled Salmon": [
+        {"item": "Salmon fillet", "qty": 1, "unit": "lb", "brand": "SeaBest"},
+        {"item": "Lemon", "qty": 2, "unit": "pcs"},
+        {"item": "Olive oil", "qty": 1, "unit": "bottle"},
+        {"item": "White rice", "qty": 1, "unit": "lb"}
+    ],
+    "Homemade Pizza": [
+        {"item": "Pizza dough", "qty": 1, "unit": "pack", "brand": "Pillsbury"},
+        {"item": "Tomato sauce", "qty": 1, "unit": "jar"},
+        {"item": "Mozzarella cheese", "qty": 1, "unit": "lb"},
+        {"item": "Pepperoni", "qty": 1, "unit": "pack"}
+    ],
+    "Oatmeal w/ fruit": [
+        {"item": "Oatmeal", "qty": 1, "unit": "box", "brand": "Quaker"},
+        {"item": "Bananas", "qty": 6, "unit": "pcs"},
+        {"item": "Strawberries", "qty": 1, "unit": "lb"}
+    ],
+    "Pancakes": [
+        {"item": "Pancake mix", "qty": 1, "unit": "box", "brand": "Aunt Jemima"},
+        {"item": "Maple syrup", "qty": 1, "unit": "bottle"},
+        {"item": "Eggs", "qty": 1, "unit": "dozen"}
+    ],
+    "Scrambled Eggs": [
+        {"item": "Eggs", "qty": 1, "unit": "dozen"},
+        {"item": "Milk", "qty": 0.5, "unit": "gal"},
+        {"item": "Salt", "qty": 1, "unit": "shaker"}
+    ],
+    "Taco Night": [
+        {"item": "Taco shells", "qty": 1, "unit": "pack", "brand": "Old El Paso"},
+        {"item": "Ground beef", "qty": 1, "unit": "lb"},
+        {"item": "Shredded lettuce", "qty": 1, "unit": "head"},
+        {"item": "Cheddar cheese", "qty": 0.5, "unit": "lb"},
+        {"item": "Salsa", "qty": 1, "unit": "jar", "brand": "Pace"}
+    ],
+    "Turkey Taco Night": [
+        {"item": "Taco shells", "qty": 1, "unit": "pack", "brand": "Old El Paso"},
+        {"item": "Ground turkey", "qty": 1, "unit": "lb"},
+        {"item": "Shredded lettuce", "qty": 1, "unit": "head"},
+        {"item": "Cheddar cheese", "qty": 0.5, "unit": "lb"},
+        {"item": "Salsa", "qty": 1, "unit": "jar", "brand": "Pace"}
+    ],
+    "Tuna Casserole": [
+        {"item": "Canned tuna", "qty": 2, "unit": "cans", "brand": "StarKist"},
+        {"item": "Egg noodles", "qty": 1, "unit": "lb"},
+        {"item": "Cream of mushroom soup", "qty": 1, "unit": "can"},
+        {"item": "Peas", "qty": 1, "unit": "bag"}
+    ],
+    "Turkey Wrap": [
+        {"item": "Tortillas", "qty": 1, "unit": "pack"},
+        {"item": "Sliced turkey", "qty": 1, "unit": "lb", "brand": "Hillshire Farm"},
+        {"item": "Lettuce", "qty": 1, "unit": "head"},
+        {"item": "Cheddar cheese", "qty": 0.5, "unit": "lb"}
+    ],
+    "Veggie Wrap": [
+        {"item": "Tortillas", "qty": 1, "unit": "pack"},
+        {"item": "Mixed vegetables", "qty": 1, "unit": "bag", "brand": "Fresh Express"},
+        {"item": "Hummus", "qty": 1, "unit": "container"}
+    ]
+}
+
+# --- Enhanced Shopping List Generator ---
+from collections import defaultdict
+
+def generate_scaled_shopping_list(meal_plan, household_size=1):
+    shopping_dict = defaultdict(lambda: {"qty": 0, "unit": "", "brand": ""})
+    for day, meals in meal_plan.items():
+        for meal in meals:
+            meal_type, meal_name, brand, base_price = meal
+            if meal_name in meal_ingredients:
+                for ing in meal_ingredients[meal_name]:
+                    item = ing["item"]
+                    qty = ing.get("qty", 1) * household_size
+                    unit = ing.get("unit", "")
+                    brand = ing.get("brand", "")
+                    if shopping_dict[item]["qty"] == 0:
+                        shopping_dict[item]["unit"] = unit
+                        shopping_dict[item]["brand"] = brand
+                    shopping_dict[item]["qty"] += qty
+    shopping_list = []
+    for item, details in shopping_dict.items():
+        shopping_list.append((item, f"{details['qty']:.2f} {details['unit']}", details["brand"]))
+    return shopping_list
+
+
 
 import random
 
@@ -29,7 +294,7 @@ def use_randomized_plan(include_fish_on_friday=True):
     ]
 
     weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    meal_data = use_randomized_plan(data.get('include_fish_friday', True))
+    meal_data = {}
 
     for day in weekdays:
         breakfast = random.choice(breakfast_options)
@@ -50,6 +315,8 @@ def use_randomized_plan(include_fish_on_friday=True):
 from fpdf import FPDF
 
 from datetime import datetime  
+
+
 
 # --- Region detection and pricing multiplier setup ---
 def get_region_from_zip(zip_code):
@@ -83,83 +350,70 @@ REGION_MULTIPLIER = {
     "West": 1.25,
 }
 
+
 def generate_pdf(data):
+    from fpdf import FPDF
     pdf = FPDF(format='letter')  # Use 8.5x11 inch paper
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, "DonKats Meal Plan - 7 Day Summary", ln=True, align="C")
+    pdf.set_font("Arial", "", 12)
 
     # Add small copyright line
     pdf.set_font("Arial", "", 9)
     pdf.cell(0, 5, "Copyright © 2025 by Donald and Kathy Sallot. All Rights Reserved.", ln=True, align="C")
-   
-    pdf.set_font("Arial", "", 12)
+    
+    pdf.set_font("Arial", "", 10)
+    
+    pdf.cell(0, 10, f"  ", ln=True)
+ 
+# Replaced by Kathy 
+#   pdf.cell(0, 10, f"Zip Code: {data.get('zip_code', '')}", ln=True)
+#
+    pdf.cell(0, 10, f"Zip Code: {data.get('zip', 'N/A')}", ln=True)
     pdf.cell(0, 10, f"Budget: ${data.get('budget', 'N/A')}", ln=True)
-    zip_code = data.get('zip', '39503')
-#    pdf.cell(0, 10, f"ZIP Code: {zip_code}", ln=True)
-
     if 'restriction' in data:
         pdf.cell(0, 10, f"Food Restrictions: {data.get('restriction')}", ln=True)
 
-    pdf.ln(5)
-
-    # Household size calculation
+    # Tier selection
+    budget = float(data.get("budget", 0) or 0)
+    selected_tier = infer_tier_from_budget(budget)
+    
+    # Get zip_code
+    zip_code = data.get("zip_code", "")
+    zip_code_save = (zip_code)
+    region = get_region_from_zip(zip_code)
+    multiplier = REGION_MULTIPLIER.get(region, 1.0)
+   
+    # Household Size Calculation
     household_size = 0
-    if data.get('adult1_name') or data.get('adult1_age'):
+    if data.get('adult1_name') and data.get('adult1_age'):
         household_size += 1
-    if data.get('adult2_name') or data.get('adult2_age'):
+    if data.get('adult2_name') and data.get('adult2_age'):
         household_size += 1
-    for i in range(1, 7):
-        if data.get(f'child{i}_name') or data.get(f'child{i}_age'):
+    for i in range(1, 5):
+        if data.get(f'child{i}_name') and data.get(f'child{i}_age'):
             household_size += 1
     if household_size == 0:
         household_size = 1
 
-    # Region pricing logic
-    region = get_region_from_zip(zip_code)
-    multiplier = REGION_MULTIPLIER.get(region, 1.00)
+    # Meal plan and tier adjustment
+    meal_data = use_randomized_plan(data.get("include_fish_friday", True))
+    meal_data = apply_tier_pricing(meal_data, selected_tier)
+
+    pdf.cell(0, 10, f"Plan Tier: {selected_tier}", ln=True)
+
+    pdf.cell(0, 10, f"  ", ln=True)
+
+    # Generate meal plan and apply tier-specific substitutions
+    meal_data = use_randomized_plan(data.get("include_fish_friday", True))
+    meal_data = apply_tier_pricing(meal_data, selected_tier)
+
+ ##   pdf.cell(0, 10, f"Plan Tier: {selected_tier}", ln=True)
+ ##   meal_data = apply_tier_pricing(meal_data, selected_tier)
 
     # Meal plan
-    meal_data = {
-        "Sunday": [
-            ("Breakfast", "Oatmeal w/ fruit", "Quaker", 1.20),
-            ("Lunch", "Grilled Cheese", "Kraft", 2.30),
-            ("Dinner", "Chicken Pasta", "Tyson", 4.80)
-        ],
-        "Monday": [
-            ("Breakfast", "Pancakes", "Aunt Jemima", 1.50),
-            ("Lunch", "Turkey Wrap", "Hillshire Farm", 2.70),
-            ("Dinner", "Beef Stir Fry", "Smithfield", 5.00)
-        ],
-        "Tuesday": [
-            ("Breakfast", "Scrambled Eggs", "Eggland's Best", 1.40),
-            ("Lunch", "Chicken Salad", "Perdue", 2.90),
-            ("Dinner", "Spaghetti", "Barilla", 4.50)
-        ],
-        "Wednesday": [
-            ("Breakfast", "Bagel & Cream Cheese", "Philadelphia", 1.30),
-            ("Lunch", "Veggie Wrap", "Fresh Express", 2.20),
-            ("Dinner", "Baked Chicken", "Tyson", 5.20)
-        ],
-        "Thursday": [
-            ("Breakfast", "Cereal & Milk", "Kellogg's", 1.00),
-            ("Lunch", "Ham Sandwich", "Oscar Mayer", 2.40),
-            ("Dinner", "Taco Night", "Old El Paso", 4.80)
-        ],
-        "Friday": [
-            ("Breakfast", "Waffles", "Eggo", 1.50),
-            ("Lunch", "Quesadilla", "Sargento", 2.60),
-            ("Dinner", "Fish & Rice", "Gorton's", 5.10)
-        ],
-        "Saturday": [
-            ("Breakfast", "French Toast", "Pepperidge Farm", 1.60),
-            ("Lunch", "PB&J Sandwich", "Jif & Smucker's", 1.80),
-            ("Dinner", "Homemade Pizza", "Pillsbury", 5.50)
-        ]
-    }
-
     weekly_total = 0
     for day, meals in meal_data.items():
         pdf.set_font("Arial", "B", 12)
@@ -197,30 +451,21 @@ def generate_pdf(data):
     pdf.cell(70, 8, "Item", 1)
     pdf.cell(30, 8, "Quantity", 1)
     pdf.cell(60, 8, "Brand Option", 1)
-    pdf.cell(30, 8, "Total", 1)
+    pdf.cell(30, 8, "Est. Cost", 1)
     pdf.ln()
 
     pdf.set_font("Arial", "", 10)
-    shopping = [
-        ("Oatmeal", 1, "box", "Quaker", 1.20),
-        ("Bread", 2, "loaves", "Store Brand", 4.00),
-        ("Chicken Breast", 3, "lb", "Tyson", 8.97),
-        ("Milk", 1, "gal", "Great Value", 3.50),
-        ("Pasta", 1, "box", "Barilla", 1.00),
-        ("Cheese", 1, "block", "Kraft", 2.50),
-        ("Eggs", 1, "dozen", "Eggland's Best", 2.20),
-        ("Wraps", 1, "pack", "Mission", 2.00),
-        ("Cereal", 1, "box", "Kellogg's", 1.00),
-        ("Pizza Dough", 1, "pack", "Pillsbury", 2.50)
-    ]
+    shopping = generate_scaled_shopping_list(meal_data, household_size)
 
-    for item, qty, unit, brand, price in shopping:
-        total_qty = qty * household_size
-        total_price = price * household_size * multiplier
+
+    for item, quantity, brand in shopping:
+        price_per_unit = ingredient_base_prices.get(item, 1.00)
+        qty_value = float(quantity.split()[0])
+        est_price = price_per_unit * qty_value * multiplier
         pdf.cell(70, 8, item, 1)
-        pdf.cell(30, 8, f"{total_qty} {unit}", 1)
+        pdf.cell(30, 8, quantity, 1)
         pdf.cell(60, 8, brand, 1)
-        pdf.cell(30, 8, f"${total_price:.2f}", 1)
+        pdf.cell(30, 8, f"${est_price:.2f}", 1)
         pdf.ln()
 
     # Calorie Summary
@@ -266,17 +511,24 @@ def generate_pdf(data):
         pdf.cell(50, 8, f"{weekly} kcal", 1)
         pdf.ln()
 
-    # ✅ Footer and file generation start here (outdented)
+    # Footer and file generation start here (outdented)
     pdf.ln(5)
-    pdf.set_font("Arial", "I", 9)
+    pdf.set_font("Arial", "", 10)
 
     from datetime import datetime
     current_date = datetime.now().strftime("%B %d, %Y")
+    
+    Zip_Code = {data.get('zip')}
 
     footer_note = (
-        f"Note: Prices are based on USDA {region} region estimates and adjusted for ZIP {zip_code}.\n"
+        f"Note: Prices are based on USDA {region} region estimates and adjusted for ZIP {Zip_Code}.\n"
+        f"   If budget is <= $ 180.00 then Thrifty Meal Plan is developed.\n"
+        f"   If budget is <= $ 250.00 then Moderate Meal Plan is developed.\n"
+        f"   If budget is >  $ 251.00 then Liberal Meal Plan is developed.\n"
         f"Generated on {current_date}. Actual prices may vary."
     )
+
+   
 
     pdf.multi_cell(0, 6, footer_note)
 
