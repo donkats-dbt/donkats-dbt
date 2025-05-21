@@ -8,14 +8,14 @@
 </head>
 <body>
   <h2>DonKats Meal Planner</h2>
-  <p><strong>One-time payment: $6.95</strong></p>
+  <p><strong>One-time payment: $7.95</strong></p>
   <div id="paypal-button-container"></div>
   <script>
     paypal.Buttons({
       createOrder: function(data, actions) {
         return actions.order.create({
           purchase_units: [{
-            amount: { value: '6.95' }
+            amount: { value: '7.95' }
           }]
         });
       },
