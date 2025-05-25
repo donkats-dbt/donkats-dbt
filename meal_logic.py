@@ -168,7 +168,7 @@ def generate_pdf(data):
     meal_data = add_calories_to_meal_plan(meal_data)
     
     pdf.cell(50, 10, f"Zip Code: {zip_info}", ln=0)                 
-    pdf.cell(50, 10, f"Budget: ${budget.2f}", ln=0) 
+    pdf.cell(50, 10, f"Budget: ${budget:.2f}", ln=0) 
     pdf.cell(50, 10, f"Plan Tier: {selected_tier}", ln=1)   
     pdf.cell(50, 10, f"Food Restrictions: {restriction}", ln=True)       
 
